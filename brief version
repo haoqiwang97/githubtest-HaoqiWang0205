@@ -14,13 +14,12 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 
 n1 = 100  #the amount of the ligands
-#radius_l=5*0.1 #radius of ligands
-radius_l=2
+radius_l=5 #radius of ligands
 
 n2 = 8 #the amount of receptors
 
-radius_r=20*0.1 #radius of receptor
-L = 1000*0.1  #the length and width of the box
+radius_r=20 #radius of receptor
+L = 1000  #the length and width of the box
 D = 1 #difussion constant
 dt = 0.1 #time step
 dt2 = dt*dt
@@ -57,25 +56,15 @@ ry = np.random.random(n1)*L*0.01+495
 vx = np.zeros(n1)
 vy = np.zeros(n1)
 '''
-'''
 rx = np.random.random(n1)*L
 ry = np.random.random(n1)*L 
 vx = (np.random.random(n1)-0.5)*vcut*2
 vy = (np.random.random(n1)-0.5)*vcut*2
-'''
-rx = np.random.random(n1)*L*0.1+45
-ry = np.random.random(n1)*L*0.1+45
-#vx = (np.random.random(NP)-0.5)*vcut*2
-#vy = (np.random.random(NP)-0.5)*vcut*2
-vx = np.zeros(n1)
-vy = np.zeros(n1)
 #give position of receptors
 #rx_r=np.zeros(n2)+50
 #ry_r=np.zeros(n2)+50
-#rx_r=[500,100,500,900,217,217,783,783]
-#ry_r=[100,500,900,500,217,783,783,217]
-rx_r=[50.0,10.0,50.0,90.0,21.7,21.7,78.3,78.3]
-ry_r=[10.0,50.0,90.0,50.0,21.7,78.3,78.3,21.7]
+rx_r=[500,100,500,900,217,217,783,783]
+ry_r=[100,500,900,500,217,783,783,217]
 
 counter=np.zeros(n2)
 #absorbed=np.zeros(n2)
@@ -117,16 +106,11 @@ def force():
             f4 = (12.0*epsilon1**12/dr12 - 6.0*epsilon1**6/dr6)/dr2
             fx4 = f4*dx
             fy4 = f4*dy
-            '''
+            
             fx[i] += fx1+fx2+fx4  #the values of interaction force 
             fx[j] -= fx1+fx2+fx4 #are the same with opposite direction
             fy[i] += fy1+fy2+fy4  #between two particles
             fy[j] -= fy1+fy2+fy4
-            '''
-            fx[i] += fx1+fx4  #the values of interaction force 
-            fx[j] -= fx1+fx4 #are the same with opposite direction
-            fy[i] += fy1+fy4  #between two particles
-            fy[j] -= fy1+fy4
             
             #fx[i] += fx1  #the values of interaction force 
             #fx[j] -= fx1  #are the same with opposite direction
@@ -186,13 +170,13 @@ def MDrun():
     
     rx += vx*dt
     ry += vy*dt
-    '''
+    ''
     for i in range(n1):
         if(rx[i]<0 or rx[i]>L):
             vx[i] = -vx[i]
         if(ry[i]<0 or ry[i]>L):
             vy[i] = -vy[i]
-    '''
+    ''
     ''
     #judge distance between ligands and receptors
     #count=0
@@ -286,8 +270,7 @@ ax2.set_title('Number of absorbed ligands')
 ax2.set_xlabel('Time')
 ax2.set_ylabel('Number of absorbed ligands')
 
-#line1,=ax1.plot(rx, ry, 'ro', markersize=radius_l)
-line1,=ax1.plot(rx, ry, 'ro')
+line1,=ax1.plot(rx, ry, 'ro', markersize=radius_l)
 line2,=ax2.plot(timelist, absorbedlist, '-')
 
 anim1 = animation.FuncAnimation(fig, animate, frames=1000, interval=1)
@@ -295,9 +278,9 @@ anim1 = animation.FuncAnimation(fig, animate, frames=1000, interval=1)
 #plt.rcParams['animation.ffmpeg_path'] = '\\usr\\local\\Cellar\\ffmpeg\\4.2.1_2\\'
 #anim1.save('test_animation.mp4',writer='FFMpegWriter')
 #anim1.save('test_animation.gif',writer='imagemagick')
-''
+'''
 FFwriter=animation.FFMpegWriter()
-anim1.save('brow_8recep_line_ligandinter_jones_wall_small_lowc.mp4',writer=FFwriter)
-''
+anim1.save('brow_8recep_line_ligandinter_jones_wall.mp4',writer=FFwriter)
+'''
 plt.show()
 ''
