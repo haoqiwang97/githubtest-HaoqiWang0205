@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Dec  9 20:39:10 2019
+
+@author: haoqiwang
+"""
+
+#%matplotlib qt5
+import numpy as np
+import math
+from matplotlib import pyplot as plt
+from matplotlib import animation
+
+n1 = 100  #the amount of the ligands
+n2 = 2 #the amount of receptors
+L = 1000  #the length and width of the box
+
+dt = 0.1 #time step
+dt2 = dt*dt
+time = 0.0
+#istep = 0
+timelist = [] #a list to store time
+
+lcharge=1 #charge of ligands
+rcharge=-1 #charge of receptor
+#tt = 0
+
+alpha=0.1#drag force
+epsilon = 1.0#permittivity
+xi = 1.0#Debye-Huckel for charge interactions
+
+
+vcut = L/100/dt  #maximum speed
+
+#initialize the location and the speed
+global vx, vy, fx, fy
+rx = np.random.random(n1)*L*0.01+495
+ry = np.random.random(n1)*L*0.01+495
+#rx = np.random.random(n1)*L/10
+#ry = np.random.random(n1)*L/10
+
+#vx = (np.random.random(n1)-0.5)*vcut*2
+#vy = (np.random.random(n1)-0.5)*vcut*2
+vx = np.zeros(n1)
+vy = np.zeros(n1)
+
+#give position of receptors
+#rx_r=np.zeros(n2)+50
+#ry_r=np.zeros(n2)+50
+rx_r=[250,750]
+ry_r=[250,750]
+
+
+def force():
+    global rx, ry, vx, vy, fx, fy
+    #T, r2cut, xi
+    fx = np.zeros(n1)
+    fy = np.zeros(n1)
+    for i in range(n1-1):
+        for j in range(i+1, n1):
+            dx = rx[i] - rx[j]
+            dy = ry[i] - ry[j]
+            dr2 = dx*dx + dy*dy
+            dr=dr2**0.5
+            #if(dr2>r2cut):
+                #continue  
+            fx1=np.random.random()-0.5
+            fy1=np.random.random()-0.5
+            #dr6 = dr2**3
+            #dr12 = dr6**2
+            #f2=1/dr2
+            f2=(1/(4*math.pi*epsilon))*((lcharge*lcharge)/dr)*math.exp(-dr/xi)
+            #f2 = (12.0*epsilon**12/dr12 - 6.0*epsilon**6/dr6)/dr2
+            #fx1 = fc*dx
+            #fy1 = fc*dy
+            #sin=abs(dx)/dr
+            #cos=abs(dy)/dr
+            sin=dy/dr
+            cos=dx/dr
+            fx2=f2*cos
+            fy2=f2*sin
+            
+            #fx3=-alpha*vx
+            #fy3=-alpha*vy
+            '''
+            fx[i] += fx1+fx2-alpha*vx[i]  #the values of interaction force 
+            fx[j] -= fx1+fx2-alpha*vx[j]  #are the same with opposite direction
+            fy[i] += fy1+fy2-alpha*vy[i]  #between two particles
+            fy[j] -= fy1+fy2-alpha*vy[j]
+            '''
+            ''
+            fx[i] += fx1+fx2  #the values of interaction force 
+            fx[j] -= fx1+fx2  #are the same with opposite direction
+            fy[i] += fy1+fy2  #between two particles
+            fy[j] -= fy1+fy2
+            ''
+            '''
+            fx[i] += fx1  #the values of interaction force 
+            fx[j] -= fx1  #are the same with opposite direction
+            fy[i] += fy1  #between two particles
+            fy[j] -= fy1
+            '''
+    for i in range (n1):
+        for k in range(n2):
+            dx_r = rx[i] - rx_r[k]
+            dy_r = ry[i] - ry_r[k]
+            dr2_r = dx_r*dx_r + dy_r*dy_r
+            dr_r=dr2_r**0.5
+            f4=-1000/dr2_r
+            
+            sin_r=dy_r/dr_r
+            cos_r=dx_r/dr_r
+            fx4=f4*cos_r
+            fy4=f4*sin_r
+            
+            fx[i] += fx4  #the values of interaction force 
+            #fx[j] -= fx1+fx2  #are the same with opposite direction
+            fy[i] += fy4  #between two particles
+            #fy[j] -= fy1+fy2
+    return
+    
+def MDrun():
+    global rx, ry, vx, vy, fx, fy, dt, time, vcut
+    #, istep
+    #, T0, T, 
+    force()
+    vx += dt*fx
+    vy += dt*fy
+    
+    #the speed can`t exceed the vcut
+    for i in range(n1):
+        if(abs(vx[i])>vcut):
+            vx[i] = abs(vx[i])/vx[i]*vcut
+        if(abs(vy[i])>vcut):
+            vy[i] = abs(vy[i])/vy[i]*vcut
+
+    rx += vx*dt
+    ry += vy*dt
+    '''
+    for i in range(n1):
+        if(rx[i]<0 or rx[i]>L):
+            vx[i] = -vx[i]
+        if(ry[i]<0 or ry[i]>L):
+            vy[i] = -vy[i]
+    '''
+    #istep += 1
+    #time += dt
+    #timelist.append(time)
+    return
+
+#animate the process
+def animate(frame):#the frame number i
+    #global tt
+    MDrun()
+    line1.set_data(rx, ry)
+    #line2.set_data(TIME, TEMPERATURE)
+    #ax2.set_xlim(-3+tt, 3+tt)
+    #tt += 0.1
+    return line1
+#, line2
+
+fig = plt.figure(figsize = (5, 5))
+#set the parameters of the ax1
+ax1 = fig.add_subplot(1, 1, 1, xlim = (0, int(L)), ylim = (0, int(L)))
+ax1.set_title('Brownian Motion with Debye-Huckel')
+ax1.set_xlabel('Length')
+ax1.set_ylabel('Width')
+
+line1,=ax1.plot(rx, ry, 'ro')
+
+circle1 = plt.Circle((500, 100), 20, color='blue')
+circle2 = plt.Circle((100, 500), 20, color='blue')
+circle3 = plt.Circle((500, 900), 20, color='blue')
+circle4 = plt.Circle((900, 500), 20, color='blue')
+
+ax1.add_artist(circle1)
+ax1.add_artist(circle2)
+ax1.add_artist(circle3)
+ax1.add_artist(circle4)
+
+anim1 = animation.FuncAnimation(fig, animate, frames=1000, interval=1)
+
+#plt.rcParams['animation.ffmpeg_path'] = '\\usr\\local\\Cellar\\ffmpeg\\4.2.1_2\\'
+#anim1.save('test_animation.mp4',writer='FFMpegWriter')
+#anim1.save('test_animation.gif',writer='imagemagick')
+'''
+FFwriter=animation.FFMpegWriter()
+anim1.save('brownian.mp4',writer=FFwriter)
+'''
+plt.show()
